@@ -1,0 +1,10 @@
+{
+    "root": [
+        "./src/index.ts",
+        "./src/controllers/shipment.controller.ts",
+        "./src/routes/shipment.routes.ts",
+        "./src/services/fship.service.ts",
+        "./src/types/fship.types.ts"
+    ],
+    "version": "5.9.2"
+}
