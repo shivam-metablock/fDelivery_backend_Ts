@@ -123,7 +123,7 @@ export const processOrderCreation = async (orderId: string,warehouseId:string) =
             pickup = data.apiData;
         }
 
-        return { status: true, error: false, message: "Order created successfully", data: result.apiData, pickup };
+        return { status: true, error: false, message: "Order created successfully", data: {order:result.apiData, pickup} };
 
     } catch (error: any) {
         console.error("Error While processing order creation", error?.response?.data?.errors || error);
