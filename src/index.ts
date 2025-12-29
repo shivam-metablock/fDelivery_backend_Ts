@@ -28,13 +28,12 @@ const app = express();
 const server=http.createServer(app);
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({
-    origin:"*"
-}));
+app.use(cors({ origin: "*" }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Routes
 app.use('/api', shipmentRoutes);
+
 
 server.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);

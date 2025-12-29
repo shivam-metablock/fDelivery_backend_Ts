@@ -1,5 +1,8 @@
 import { Router } from 'express';
 import * as shipmentController from '../controllers/shipment.controller.js';
+import multer from "multer";
+
+const upload = multer();
 
 const router = Router();
 
@@ -33,7 +36,7 @@ router.post('/price', shipmentController.getPrice);
 
 // 3 create order
 
-router.post('/orders', shipmentController.createOrder);
+router.post('/orders', upload.none(),shipmentController.createOrder);
 
 
 // 4 add warehouse

@@ -30,6 +30,7 @@ export const addWareHouse = async (req: Request, res: Response) => {
 }
 export const createOrder = async (req: Request, res: Response) => {
     try {
+        
         const orderId = req.body.order_id;
         const warehouse_id=req.body.warehouse_id;
         if(!orderId||!warehouse_id){
