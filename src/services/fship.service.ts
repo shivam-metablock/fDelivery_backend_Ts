@@ -62,7 +62,7 @@ class FshipService {
 
 
     async getCouriers(): Promise<FshipResponse> {
-        const response = await this.api.get('/get-courier');
+        const response = await this.api.get('/getallcourier');
         return ResponseHandler(response);
     }
 
