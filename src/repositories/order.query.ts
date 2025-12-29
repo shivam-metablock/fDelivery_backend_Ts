@@ -56,3 +56,12 @@ export const getOrder = async (orderId: string, warehouseId: string) => {
 
     return row
 }
+
+export const getOrderStatus=async()=>{
+    const row=await pool.query<RowDataPacket[]>(`
+        Select waybill
+        FROM orders
+        WHERE is_order_shipped = 0;
+        `)
+    return row
+}

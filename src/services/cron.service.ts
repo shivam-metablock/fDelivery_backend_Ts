@@ -1,6 +1,8 @@
 import cron from 'node-cron';
 import { redisClient } from './redis.service.js';
 import { processOrderCreation } from './order.service.js';
+import { getOrderStatus } from '../repositories/order.query.js';
+import { fshipService } from './fship.service.js';
 
 async function connectRedis() {
     if (!redisClient.isOpen) {
@@ -70,6 +72,36 @@ export const initCronJobs = () => {
             console.error('Error in cron job lock/system:', error);
         }
     });
+    //    cron.schedule('0 0/1 * * *', async () => {
+    //     try {
+    //         await connectRedis();
+
+    //         const lockKey = 'cron_order_status_lock';
+    //         const acquired = await redisClient.set(lockKey, 'locked', {
+    //             NX: true,
+    //             EX: 55 * 3
+    //         });
+
+    //         if (!acquired) {
+    //             return;
+    //         }
+
+    //         console.log('Running cron job (Lock acquired) for order status update');
+    //         try {
+
+    //           const row=await getOrderStatus();
+    //           const waybill=row[0].map((item:any)=>item.waybill);
+
+    //           const status=await fshipService.;
+
+    //             console.log('Finished processing all retries in this cycle.');
+    //         } catch (error) {
+    //             console.error('Error in cron job logic:', error);
+    //         }
+    //     } catch (error) {
+    //         console.error('Error in cron job lock/system:', error);
+    //     }
+    // });
 
     console.log('Cron jobs initialized (Retry failed orders every 3 hours)');
 };

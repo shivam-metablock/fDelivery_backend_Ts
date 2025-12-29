@@ -5,6 +5,7 @@ import pool from './config/db.config.js';
 import { initCronJobs } from './services/cron.service.js';
 import http from "http";
 import os from "os";
+import cors from 'cors';
 import cluster from 'cluster';
 
 dotenv.config();
@@ -27,6 +28,7 @@ const app = express();
 const server=http.createServer(app);
 const PORT = process.env.PORT || 3000;
 
+app.use(cors());
 app.use(express.json());
 
 // Routes
