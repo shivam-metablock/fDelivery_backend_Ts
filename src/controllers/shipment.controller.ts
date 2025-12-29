@@ -33,7 +33,7 @@ export const createOrder = async (req: Request, res: Response) => {
         const orderId = req.body.order_id;
         const warehouse_id=req.body.warehouse_id;
         if(!orderId||!warehouse_id){
-            return res.status(200).json({ status: false, error: true, message: "Order ID and Warehouse ID are required" });
+            return res.status(200).json({ status: false, error: true, message: "Order ID and Warehouse ID are required" ,data:{order:req.body.order_id,warehouse_id:req.body.warehouse_id}});
         }
         const result = await processOrderCreation(orderId,warehouse_id);
 

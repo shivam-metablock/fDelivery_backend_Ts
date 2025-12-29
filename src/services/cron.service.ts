@@ -90,9 +90,9 @@ export const initCronJobs = () => {
     //         try {
 
     //           const row=await getOrderStatus();
-    //           const waybill=row[0].map((item:any)=>item.waybill);
+    //           const waybill=await Promise.allSettled([row[0].map(async(item:any)=>fshipService.getPickupDetails({waybill:item.waybill}))])
 
-    //           const status=await fshipService.;
+             
 
     //             console.log('Finished processing all retries in this cycle.');
     //         } catch (error) {
