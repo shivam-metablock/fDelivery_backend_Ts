@@ -54,6 +54,8 @@ const CalculatePrice = (Price: any) => {
 
 export const WareHouseApiUse = async (data:any,row:any) => {
     
+    console.log("wareHouseApiUse",row.warehouse_name,row.address_1,row.pincode,row.city,data.contact_person_name,data.phone);
+    
     const warehouse = await fshipService.addWarehouse({
         warehouseId: 0,
         warehouseName: row.warehouse_name,
@@ -71,6 +73,13 @@ export const AddInDBWarehouse=async( warehouseTable_id:number,warehouseId:number
     console.log("warehouseTable_id",typeof warehouseTable_id);
     console.log("warehouseId",typeof warehouseId);
     
-   const row= await pool.query("UPDATE warehouses SET warehouse_id = ? WHERE id = ?",[warehouseId,warehouseTable_id]);
+   try {
+    const row= await pool.query("UPDATE warehouses SET warehouse_id = ? WHERE id = ?",[warehouseId,warehouseTable_id]);
+    console.log(row);
+    
+   } catch (error) {
+    console.log("error in the AddInDBWarehouse",error);
+    
+   }
   
 }

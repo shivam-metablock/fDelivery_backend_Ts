@@ -2,10 +2,11 @@ import { fshipService } from './fship.service.js';
 import { getOrder } from '../repositories/order.query.js';
 import { AddInDBWarehouse, PriceApiUse, WareHouseApiUse } from './api.service.js';
 import { logFailedOrder } from './redis.service.js';
+import { ApiResponseHandler } from '../handlers/Response.Handlers.js';
 
-export const processOrderCreation = async (orderId: string) => {
+export const processOrderCreation = async (orderId: string,warehouseId:string) => {
     try {
-        const row = await getOrder(orderId);
+        const row = await getOrder(orderId,warehouseId);
         if (row.length < 1) {
             return { status: false, error: true, message: "Order not found" };
         }
@@ -23,27 +24,26 @@ export const processOrderCreation = async (orderId: string) => {
         };
 
         const orderAmount = row[0].order_amount;
-        let warehouseId = row[0].warehouse_id;
-        const warehouseTable_id = row[0].warehouseTable_id;
+        const warehouse_id = row[0].warehouse_id;
+        warehouseId=row[0].warehouseTable_id;
         let price = await PriceApiUse(PackageSize, shippingAddress, billingAddress, row, orderAmount);
 
-        if (!warehouseId) {
+        if (!warehouse_id) {
             let WareHouse = await WareHouseApiUse(shippingAddress, row[0]);
             if (WareHouse.error || !WareHouse.status) {
-                await logFailedOrder(orderId);
-                return { status: false, error: true, message: WareHouse.message || "Warehouse not found" };
+                await logFailedOrder(orderId,warehouseId);
+                return ApiResponseHandler(WareHouse, "Warehouse not found")
             }
-            console.log("wareHouseData", WareHouse.apiData);
 
             warehouseId = WareHouse.apiData?.warehouseId;
-            await AddInDBWarehouse(warehouseTable_id, warehouseId);
+            await AddInDBWarehouse(Number(warehouseId), Number(warehouse_id));
 
 
         }
 
         if (price.error || !price.status || !price.data) {
-            await logFailedOrder(orderId);
-            return { status: false, error: true, message: price.message || "Price calculation failed" };
+            await logFailedOrder(orderId,warehouseId);
+            return ApiResponseHandler(price, "Price calculation failed")
         }
 
         let totalTaxAmount = row[0].total_tax_amount;
@@ -107,8 +107,8 @@ export const processOrderCreation = async (orderId: string) => {
 
         const result = await fshipService.createOrder(body);
         if (result.error || !result.status) {
-            await logFailedOrder(orderId);
-            return { status: false, error: true, message: result.message || "API Order creation failed" };
+            await logFailedOrder(orderId,warehouseId);
+            return ApiResponseHandler(result, "API Order creation failed")
         }
 
         let pickup = null;
@@ -117,8 +117,8 @@ export const processOrderCreation = async (orderId: string) => {
                 waybills: [String(result.apiData.waybill)]
             });
             if (data.error || !data.status) {
-                await logFailedOrder(orderId);
-                return { status: false, error: true, message: data.message || "Pickup registration failed", data: result.apiData };
+                await logFailedOrder(orderId,warehouseId);
+                return ApiResponseHandler(data, "Pickup registration failed")
             }
             pickup = data.apiData;
         }
@@ -127,7 +127,7 @@ export const processOrderCreation = async (orderId: string) => {
 
     } catch (error: any) {
         console.error("Error While processing order creation", error?.response?.data?.errors || error);
-        await logFailedOrder(orderId);
+        await logFailedOrder(orderId,warehouseId);
         return { status: false, error: true, message: error?.response?.data?.errors || error.message };
     }
 };

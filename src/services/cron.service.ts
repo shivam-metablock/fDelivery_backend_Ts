@@ -9,15 +9,15 @@ async function connectRedis() {
 }
 
 export const initCronJobs = () => {
-// 0 0/3 * * *
-    cron.schedule('0 0/3 * * *', async () => {
+    // 0 0/3 * * *
+    cron.schedule('* * * * *', async () => {
         try {
             await connectRedis();
 
             const lockKey = 'cron_retry_failed_orders_lock';
             const acquired = await redisClient.set(lockKey, 'locked', {
                 NX: true,
-                EX: 55*3
+                EX: 55 * 3
             });
 
             if (!acquired) {
@@ -41,15 +41,15 @@ export const initCronJobs = () => {
 
 
                 const UniquefailedOrders = [...new Set(failedOrders)];
-
+                console.log("UniquefailedOrders",UniquefailedOrders);
 
                 const retryPromises = UniquefailedOrders.map(async (orderStr) => {
                     try {
-                        const orderId = JSON.parse(orderStr);
+                        const { orderData:orderId, warehouseId:warehouseId } = JSON.parse(orderStr);
 
 
                         console.log(`Retrying order: ${orderId}`);
-                        const result = await processOrderCreation(orderId);
+                        const result = await processOrderCreation(orderId, warehouseId);
 
                         if (result.status) {
                             console.log(`Order ${orderId} retried successfully.`);

@@ -18,10 +18,10 @@ async function connectRedis() {
     }
 }
 
-export const logFailedOrder = async (orderData: any) => {
+export const logFailedOrder = async (orderData: any,warehouseId:string) => {
     try {
         await connectRedis();
-        await redisClient.lPush('failed_orders', JSON.stringify(orderData));
+        await redisClient.lPush('failed_orders', JSON.stringify({orderData,warehouseId}));
         console.log('Failed order logged to Redis');
     } catch (err) {
         console.error('Error logging to Redis:', err);
