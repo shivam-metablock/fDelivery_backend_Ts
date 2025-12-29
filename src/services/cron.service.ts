@@ -19,7 +19,7 @@ export const initCronJobs = () => {
             const lockKey = 'cron_retry_failed_orders_lock';
             const acquired = await redisClient.set(lockKey, 'locked', {
                 NX: true,
-                EX: 55 * 3
+                EX: 55
             });
 
             if (!acquired) {

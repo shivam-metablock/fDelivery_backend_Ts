@@ -26,6 +26,10 @@ export const processOrderCreation = async (orderId: string,warehouseId:string) =
         const orderAmount = row[0].order_amount;
         const warehouse_id = row[0].warehouse_id;
         warehouseId=row[0].warehouseTable_id;
+        console.log("rowdata",row[0]);
+        if(!warehouseId){
+            return ApiResponseHandler({message:"Warehouse not found"})
+        }
         let price = await PriceApiUse(PackageSize, shippingAddress, billingAddress, row, orderAmount);
 
         if (!warehouse_id) {

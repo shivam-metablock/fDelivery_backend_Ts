@@ -75,10 +75,10 @@ export const AddInDBWarehouse=async( warehouseTable_id:number,warehouseId:number
     
    try {
     const row= await pool.query("UPDATE warehouses SET warehouse_id = ? WHERE id = ?",[warehouseId,warehouseTable_id]);
-    console.log(row);
+    console.log("AddInDBWarehouse",row);
     
    } catch (error) {
-    console.log("error in the AddInDBWarehouse",error);
+    console.error("error in the AddInDBWarehouse",error);
     
    }
   

@@ -10,9 +10,9 @@ export const ResponseHandler = (response: any) => {
     }
 }
 
-export const ApiResponseHandler = (response: any, text: string) => {
+export const ApiResponseHandler = (response: any, text?: string) => {
 
-    console.log("error in the ", text);
+    console.error("error in the ", text);
 
     return { status: false, error: true, message: response.message || response.apiData.response || text };
 

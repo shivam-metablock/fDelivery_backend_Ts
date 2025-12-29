@@ -3,6 +3,8 @@ import pool from '../config/db.config.js';
 import { RowDataPacket } from 'mysql2';
 
 export const getOrder = async (orderId: string, warehouseId: string) => {
+    console.log("warehouseId",warehouseId);
+    
     const [row] = await pool.query<RowDataPacket[]>(`
     SELECT
     o.shipping_address_data,
@@ -48,7 +50,7 @@ export const getOrder = async (orderId: string, warehouseId: string) => {
          JOIN order_details od 
               ON o.id = od.order_id
          LEFT JOIN warehouses w  
-              ON w.seller_id = ?
+              ON w.id = ?
 
     WHERE o.id = ?
     GROUP BY o.id;

@@ -45,7 +45,7 @@ export const createOrder = async (req: Request, res: Response) => {
         return res.json(result);
 
     } catch (error: any) {
-        console.log("Error in createOrder controller", error);
+        console.error("Error in createOrder controller", error);
         res.status(500).json({ status: false, error: true, message: error.message });
     }
 };
