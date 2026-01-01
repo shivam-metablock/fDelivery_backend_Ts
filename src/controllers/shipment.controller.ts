@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { fshipService } from '../services/fship.service.js';
 import { processOrderCreation } from '../services/order.service.js';
+import { processPickupCreation } from '../services/PickUp.service.js';
 
 
 export const checkPincode = async (req: Request, res: Response) => {
@@ -52,9 +53,10 @@ export const createOrder = async (req: Request, res: Response) => {
 
 export const registerPickup = async (req: Request, res: Response) => {
     try {
-        const result = await fshipService.registerPickup(req.body);
+        const result = await processPickupCreation(req.body.waybill);
         res.json(result);
     } catch (error: any) {
+
         res.status(500).json({ status: false, error: true, message: error.message });
     }
 }

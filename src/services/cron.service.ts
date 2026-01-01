@@ -1,8 +1,8 @@
 import cron from 'node-cron';
 import { redisClient } from './redis.service.js';
 import { processOrderCreation } from './order.service.js';
-import { getOrderStatus } from '../repositories/order.query.js';
 import { fshipService } from './fship.service.js';
+import { processPickupCreation } from './PickUp.service.js';
 
 async function connectRedis() {
     if (!redisClient.isOpen) {
@@ -12,7 +12,7 @@ async function connectRedis() {
 
 export const initCronJobs = () => {
     // 0 0/3 * * *
-    cron.schedule('* * * * *', async () => {
+    cron.schedule('0 0/3 * * *', async () => {
         try {
             await connectRedis();
 
@@ -103,5 +103,47 @@ export const initCronJobs = () => {
     //     }
     // });
 
+    cron.schedule('0 0/1 * * *', async () => {
+        try {
+            await connectRedis();
+
+            const lockKey = 'cron_pickup_lock';
+            const acquired = await redisClient.set(lockKey, 'locked', {
+                NX: true,
+                EX: 55 
+            });
+
+            if (!acquired) {
+                return;
+            }
+
+            console.log('Running cron job (Lock acquired) for pickup update');
+            try {
+
+                           const pickup = await redisClient.lRange('failed_pickup', 0, -1);
+
+                if (pickup.length === 0) {
+                    console.log('No failed orders to retry.');
+                    return;
+                }
+
+                console.log(`Found ${pickup.length} failed orders to retry.`);
+
+
+                await redisClient.del('failed_pickup')
+
+
+                const Uniquepickup = [...new Set(pickup)];
+                console.log("Uniquepickup",Uniquepickup);
+                await Promise.allSettled([Uniquepickup.map(async(item:any)=>processPickupCreation(item))])
+
+            console.log('Finished processing all retries in this cycle.');
+            } catch (error) {
+                console.error('Error in cron job logic:', error);
+            }
+        } catch (error) {
+            console.error('Error in cron job lock/system:', error);
+        }
+    });
     console.log('Cron jobs initialized (Retry failed orders every 3 hours)');
 };

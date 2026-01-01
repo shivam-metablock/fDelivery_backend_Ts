@@ -85,7 +85,7 @@ class FshipService {
         return ResponseHandler(response);
     }
     async getPickupDetails(data: { waybill: string }): Promise<FshipResponse> {
-        const response = await this.api.post('/shipmentsummary', data);
+        const response = await this.api.post('/trackinghistory', data);
         return ResponseHandler(response);
     }
 

@@ -49,7 +49,7 @@ export const getOrder = async (orderId: string, warehouseId: string) => {
     FROM orders o
          JOIN order_details od 
               ON o.id = od.order_id
-         LEFT JOIN warehouses w  
+              LEFT JOIN warehouses w  
               ON w.id = ?
 
     WHERE o.id = ?
@@ -63,7 +63,24 @@ export const getOrderStatus=async()=>{
     const row=await pool.query<RowDataPacket[]>(`
         Select waybill
         FROM orders
-        WHERE is_order_shipped = 0;
+        WHERE is_order_shipped = 1;
         `)
+    return row
+}
+export const updateOrderStatus=async(orderId:string,status:string)=>{
+    const row=await pool.query<RowDataPacket[]>(`
+        Update orders
+        SET is_order_shipped  = ?,
+ WHERE id = ?;
+        `,[status,orderId])
+    return row
+}
+
+export const updatePickupStatus=async(waybill:string,status:string)=>{
+    const row=await pool.query<RowDataPacket[]>(`
+        Update orders
+        SET is_pickuped  = ?,
+        WHERE waybill = ?;  
+        `,[status,waybill])
     return row
 }

@@ -1,5 +1,5 @@
 import { fshipService } from './fship.service.js';
-import { getOrder } from '../repositories/order.query.js';
+import { getOrder, updateOrderStatus } from '../repositories/order.query.js';
 import { AddInDBWarehouse, PriceApiUse, WareHouseApiUse } from './api.service.js';
 import { logFailedOrder } from './redis.service.js';
 import { ApiResponseHandler } from '../handlers/Response.Handlers.js';
@@ -24,7 +24,7 @@ export const processOrderCreation = async (orderId: string,warehouseId:string) =
         };
 
         const orderAmount = row[0].order_amount;
-        const warehouse_id = row[0].warehouse_id;
+        let warehouse_id = row[0].warehouse_id;
         warehouseId=row[0].warehouseTable_id;
         console.log("rowdata",row[0]);
         if(!warehouseId){
@@ -39,7 +39,9 @@ export const processOrderCreation = async (orderId: string,warehouseId:string) =
                 return ApiResponseHandler(WareHouse, "Warehouse not found")
             }
 
-            warehouseId = WareHouse.apiData?.warehouseId;
+            console.log("WareHouse",WareHouse.apiData);
+            
+            warehouse_id = WareHouse.apiData?.warehouseId;
             await AddInDBWarehouse(Number(warehouseId), Number(warehouse_id));
 
 
@@ -102,8 +104,8 @@ export const processOrderCreation = async (orderId: string,warehouseId:string) =
             "shipment_Width": PackageSize.width,
             "shipment_Height": PackageSize.height,
             "volumetric_Weight": 0,
-            "pick_Address_ID": warehouseId,
-            "return_Address_ID": warehouseId,
+            "pick_Address_ID": warehouse_id,
+            "return_Address_ID": warehouse_id,
             "products": Product,
             "courierId": price.data,
             ...extraFields
@@ -115,19 +117,20 @@ export const processOrderCreation = async (orderId: string,warehouseId:string) =
             return ApiResponseHandler(result, "API Order creation failed")
         }
 
-        let pickup = null;
-        if (result.apiData?.waybill) {
-            const data = await fshipService.registerPickup({
-                waybills: [String(result.apiData.waybill)]
-            });
-            if (data.error || !data.status) {
-                await logFailedOrder(orderId,warehouseId);
-                return ApiResponseHandler(data, "Pickup registration failed")
-            }
-            pickup = data.apiData;
-        }
+        // let pickup = null;
+        // if (result.apiData?.waybill) {
+        //     const data = await fshipService.registerPickup({
+        //         waybills: [String(result.apiData.waybill)]
+        //     });
+        //     if (data.error || !data.status) {
+        //         await logFailedOrder(orderId,warehouseId);
+        //         return ApiResponseHandler(data, "Pickup registration failed")
+        //     }
+        //     pickup = data.apiData;
+        // }
+        await updateOrderStatus(orderId,"1");
 
-        return { status: true, error: false, message: "Order created successfully", data: {order:result.apiData, pickup} };
+        return { status: true, error: false, message: "Order created successfully", data: {order:result.apiData} };
 
     } catch (error: any) {
         console.error("Error While processing order creation", error?.response?.data?.errors || error);

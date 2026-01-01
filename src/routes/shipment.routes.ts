@@ -32,7 +32,7 @@ body:{
  "
 }
 */
-router.post('/price', shipmentController.getPrice);
+router.post('/price',upload.none(), shipmentController.getPrice);
 
 // 3 create order
 
@@ -63,7 +63,7 @@ router.post('/addWareHouse', shipmentController.addWareHouse);
     "string"  (Get From CREATE FORWARD ORDER)
 ]
 } */
-router.post('/registerPickup', shipmentController.registerPickup);
+router.post('/registerPickup',upload.none(), shipmentController.registerPickup);
 //6 CANCEL SHIPMENT 
 /*
 {
@@ -77,7 +77,7 @@ router.post('/cancelShipment', shipmentController.cancelShipment);
  
 "waybill": "143455210101006"
  */
-router.post('/checkShipment', shipmentController.getPickupDetails);
+router.post('/checkShipment', upload.none(),shipmentController.getPickupDetails);
 
 
 router.post('/label', shipmentController.getShippingLabel);

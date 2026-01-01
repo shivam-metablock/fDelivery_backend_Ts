@@ -1,0 +1,36 @@
+{
+    "status": true,
+    "error": false,
+    "message": "Order created successfully",
+    "data": {
+        "order": {
+            "route_code": "GGN/JAI/JVC",
+            "order_status": "success",
+            "apiorderid": 4386142,
+            "waybill": "80149506080",
+            "status": true,
+            "response": "Order placed successfully",
+            "labelurl": "https://qc-manifest.fship.in/upload/label_html/label_80149506080_4386142_TH.pdf"
+        },
+        "pickup": {
+            "apipickuporderids": [
+                {
+                    "pickupOrderId": 196600,
+                    "waybills": [
+                        "80149506080"
+                    ],
+                    "fshipPickupId": "1767243559",
+                    "courierPickupId": "30403159DEMO",
+                    "pickupDate": "2026-01-01T00:00:00",
+                    "pickupTime": "12:00:00",
+                    "serviceProviderId": 1,
+                    "serviceProviderName": "Blue dart",
+                    "pickupStatusId": 1
+                }
+            ],
+            "status": true,
+            "response": "Pickup registered successfully",
+            "labelurl": ""
+        }
+    }
+}

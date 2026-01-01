@@ -70,8 +70,8 @@ export const WareHouseApiUse = async (data:any,row:any) => {
 }
 
 export const AddInDBWarehouse=async( warehouseTable_id:number,warehouseId:number)=>{
-    console.log("warehouseTable_id",typeof warehouseTable_id);
-    console.log("warehouseId",typeof warehouseId);
+    console.log("warehouseTable_id", warehouseTable_id);
+    console.log("warehouseId", warehouseId);
     
    try {
     const row= await pool.query("UPDATE warehouses SET warehouse_id = ? WHERE id = ?",[warehouseId,warehouseTable_id]);
