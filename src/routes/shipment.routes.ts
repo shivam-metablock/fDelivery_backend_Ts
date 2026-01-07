@@ -14,7 +14,7 @@ body:{
     "source_Pincode": "110001" (Seller)
 }
 */
-router.post('/checkPincode', shipmentController.checkPincode);
+router.post('/checkPincode',upload.none(), shipmentController.checkPincode);
 
 // 2 check the price of the shipment`
 /*
