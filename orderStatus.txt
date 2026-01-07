@@ -1,0 +1,20 @@
+ "trackingdata": [
+          {
+            "dateandTime": "2026-01-02T12:23:51.42",
+            "status": "Manifested",
+            "remark": "Manifested",
+            "location": "",
+            "shipmentJourney": 1,
+            "statusCode": "Manifested",
+            "statusCodeType": ""
+          },
+          {
+            "dateandTime": "2026-01-02T12:23:50.77",
+            "status": "Booked",
+            "remark": "Booked",
+            "location": "Pune",
+            "shipmentJourney": 1,
+            "statusCode": "Booked",
+            "statusCodeType": ""
+          }
+        ],

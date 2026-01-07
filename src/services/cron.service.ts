@@ -3,6 +3,7 @@ import { redisClient } from './redis.service.js';
 import { processOrderCreation } from './order.service.js';
 import { fshipService } from './fship.service.js';
 import { processPickupCreation } from './PickUp.service.js';
+import { AddDataINorder, BulkInsertDataInorderTable, getOrderStatus } from '../repositories/order.query.js';
 
 async function connectRedis() {
     if (!redisClient.isOpen) {
@@ -12,14 +13,14 @@ async function connectRedis() {
 
 export const initCronJobs = () => {
     // 0 0/3 * * *
-    cron.schedule('0 0/3 * * *', async () => {
+    cron.schedule('0 0/1 * * *', async () => {
         try {
             await connectRedis();
 
             const lockKey = 'cron_retry_failed_orders_lock';
             const acquired = await redisClient.set(lockKey, 'locked', {
                 NX: true,
-                EX: 55
+                EX: 10800/3
             });
 
             if (!acquired) {
@@ -43,11 +44,10 @@ export const initCronJobs = () => {
 
 
                 const UniquefailedOrders = [...new Set(failedOrders)];
-                console.log("UniquefailedOrders",UniquefailedOrders);
 
                 const retryPromises = UniquefailedOrders.map(async (orderStr) => {
                     try {
-                        const { orderData:orderId, warehouseId:warehouseId } = JSON.parse(orderStr);
+                        const { orderData: orderId, warehouseId: warehouseId } = JSON.parse(orderStr);
 
 
                         console.log(`Retrying order: ${orderId}`);
@@ -72,45 +72,62 @@ export const initCronJobs = () => {
             console.error('Error in cron job lock/system:', error);
         }
     });
-    //    cron.schedule('0 0/1 * * *', async () => {
-    //     try {
-    //         await connectRedis();
+    cron.schedule('0 0/6 * * *', async () => {
+        try {
+            await connectRedis();
 
-    //         const lockKey = 'cron_order_status_lock';
-    //         const acquired = await redisClient.set(lockKey, 'locked', {
-    //             NX: true,
-    //             EX: 55 * 3
-    //         });
+            const lockKey = 'cron_order_status_lock';
+            const acquired = await redisClient.set(lockKey, 'locked', {
+                NX: true,
+                EX:  10800*2
+            });
 
-    //         if (!acquired) {
-    //             return;
-    //         }
+            if (!acquired) {
+                return;
+            }
 
-    //         console.log('Running cron job (Lock acquired) for order status update');
-    //         try {
+            console.log('Running cron job (Lock acquired) for order status update');
+            try {
 
-    //           const row=await getOrderStatus();
-    //           const waybill=await Promise.allSettled([row[0].map(async(item:any)=>fshipService.getPickupDetails({waybill:item.waybill}))])
+                const row = await getOrderStatus();
+                if (row[0].length === 0) {
+                    console.log('No orders to update.');
+                    return;
+                }
 
-             
+                const waybill = await Promise.allSettled(row[0].map(async (item: any) => fshipService.getPickupDetails({ waybill: item.waybill })))
 
-    //             console.log('Finished processing all retries in this cycle.');
-    //         } catch (error) {
-    //             console.error('Error in cron job logic:', error);
-    //         }
-    //     } catch (error) {
-    //         console.error('Error in cron job lock/system:', error);
-    //     }
-    // });
+                const fulfilledData = waybill
+                    .filter(item => item.status === 'fulfilled')
+                    .map((item: any) => [
+                        item.value?.summary?.waybill,
+                        JSON.stringify(item.value?.trackingdata),
+                        item.value?.summary?.expectedDeliveryDate
+                    ]);
 
+
+                await BulkInsertDataInorderTable(fulfilledData)
+
+
+
+                console.log('Finished processing all retries in this cycle.');
+            } catch (error) {
+                console.error('Error in cron job logic:', error);
+            }
+        } catch (error) {
+            console.error('Error in cron job lock/system:', error);
+        }
+    });
     cron.schedule('0 0/1 * * *', async () => {
         try {
             await connectRedis();
 
+            console.log("start Job");
+
             const lockKey = 'cron_pickup_lock';
             const acquired = await redisClient.set(lockKey, 'locked', {
                 NX: true,
-                EX: 55 
+                EX: 10800/3
             });
 
             if (!acquired) {
@@ -120,24 +137,22 @@ export const initCronJobs = () => {
             console.log('Running cron job (Lock acquired) for pickup update');
             try {
 
-                           const pickup = await redisClient.lRange('failed_pickup', 0, -1);
+                let pickup = await redisClient.lRange('failed_pickup', 0, -1);
+                pickup = pickup.map(item => JSON.parse(item))
 
                 if (pickup.length === 0) {
                     console.log('No failed orders to retry.');
                     return;
                 }
-
                 console.log(`Found ${pickup.length} failed orders to retry.`);
-
-
                 await redisClient.del('failed_pickup')
-
-
                 const Uniquepickup = [...new Set(pickup)];
-                console.log("Uniquepickup",Uniquepickup);
-                await Promise.allSettled([Uniquepickup.map(async(item:any)=>processPickupCreation(item))])
 
-            console.log('Finished processing all retries in this cycle.');
+
+                await processPickupCreation(Uniquepickup, true)
+
+
+                console.log('Finished processing all retries in this cycle.');
             } catch (error) {
                 console.error('Error in cron job logic:', error);
             }

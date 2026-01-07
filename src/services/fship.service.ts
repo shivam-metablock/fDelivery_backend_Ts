@@ -35,10 +35,6 @@ class FshipService {
     async getPrice(data: { source_Pincode: string, destination_Pincode: string, payment_Mode: string, amount: number, express_Type: string, shipment_Weight: number, shipment_Length: number, shipment_Width: number, shipment_Height: number }): Promise<FshipResponse<any>> {
 
         const response = await this.api.post('/RateCalculator', data);
-
-
-
-
         return ResponseHandler(response);
     }
     async addWarehouse(data: AddWarehouseRequest): Promise<FshipResponse> {
@@ -47,16 +43,11 @@ class FshipService {
     }
     async createOrder(data: any): Promise<FshipResponse> {
         const response = await this.api.post('/createforwardorder', data);
-
-
         return ResponseHandler(response);
     }
 
     async registerPickup(data: RegisterPickupRequest): Promise<FshipResponse> {
-
-
         const response = await this.api.post('/registerpickup', data);
-
         return ResponseHandler(response);
     }
 
@@ -65,10 +56,6 @@ class FshipService {
         const response = await this.api.get('/getallcourier');
         return ResponseHandler(response);
     }
-
-
-
-
 
     async cancelShipment(data: CancelOrderRequest): Promise<FshipResponse> {
         const response = await this.api.post('/CancelOrder', data);

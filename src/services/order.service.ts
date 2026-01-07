@@ -1,12 +1,13 @@
 import { fshipService } from './fship.service.js';
 import { getOrder, updateOrderStatus } from '../repositories/order.query.js';
 import { AddInDBWarehouse, PriceApiUse, WareHouseApiUse } from './api.service.js';
-import { logFailedOrder } from './redis.service.js';
+import { logFailedOrder, redisClient } from './redis.service.js';
 import { ApiResponseHandler } from '../handlers/Response.Handlers.js';
+import { processPickupCreation } from './PickUp.service.js';
 
-export const processOrderCreation = async (orderId: string,warehouseId:string) => {
+export const processOrderCreation = async (orderId: string, warehouseId: string) => {
     try {
-        const row = await getOrder(orderId,warehouseId);
+        const row = await getOrder(orderId, warehouseId);
         if (row.length < 1) {
             return { status: false, error: true, message: "Order not found" };
         }
@@ -25,22 +26,22 @@ export const processOrderCreation = async (orderId: string,warehouseId:string) =
 
         const orderAmount = row[0].order_amount;
         let warehouse_id = row[0].warehouse_id;
-        warehouseId=row[0].warehouseTable_id;
-        console.log("rowdata",row[0]);
-        if(!warehouseId){
-            return ApiResponseHandler({message:"Warehouse not found"})
+        warehouseId = row[0].warehouseTable_id;
+        // console.log("rowdata",row[0]);
+        if (!warehouseId) {
+            return ApiResponseHandler({ message: "Warehouse not found" })
         }
-        let price = await PriceApiUse(PackageSize, shippingAddress, billingAddress, row, orderAmount);
+        let price = await PriceApiUse(PackageSize, shippingAddress, billingAddress, row, orderAmount, orderId);
 
         if (!warehouse_id) {
             let WareHouse = await WareHouseApiUse(shippingAddress, row[0]);
             if (WareHouse.error || !WareHouse.status) {
-                await logFailedOrder(orderId,warehouseId);
+                await logFailedOrder(orderId, warehouseId);
                 return ApiResponseHandler(WareHouse, "Warehouse not found")
             }
 
-            console.log("WareHouse",WareHouse.apiData);
-            
+            console.log("WareHouse", WareHouse.apiData);
+
             warehouse_id = WareHouse.apiData?.warehouseId;
             await AddInDBWarehouse(Number(warehouseId), Number(warehouse_id));
 
@@ -48,7 +49,7 @@ export const processOrderCreation = async (orderId: string,warehouseId:string) =
         }
 
         if (price.error || !price.status || !price.data) {
-            await logFailedOrder(orderId,warehouseId);
+            await logFailedOrder(orderId, warehouseId);
             return ApiResponseHandler(price, "Price calculation failed")
         }
 
@@ -83,58 +84,66 @@ export const processOrderCreation = async (orderId: string,warehouseId:string) =
             "cod_Amount": orderAmount,
         };
 
-        const body = {
-            "customer_Name": shippingAddress.contact_person_name,
-            "customer_Mobile": shippingAddress.phone.replace("+91", ""),
-            "customer_Emailid": shippingAddress.email || "lol@gmail.com",
-            "customer_Address": shippingAddress.address,
-            "customer_Address_Type": shippingAddress.address_type,
-            "customer_PinCode": shippingAddress.zip,
-            "customer_City": shippingAddress.city,
-            "orderId": orderId,
-            "payment_Mode": row[0].payment_method == "cash_on_delivery" ? 1 : 2,
-            "express_Type": row[0].delivery_type ?? "surface",
-            "is_Ndd": 0,
-            "order_Amount": netAmount,
-            "tax_Amount": taxModel == "include" ? Tax : totalTaxAmount,
-            "extra_Charges": shippingCost,
-            "total_Amount": orderAmount,
-            "shipment_Weight": PackageSize.weight,
-            "shipment_Length": PackageSize.length,
-            "shipment_Width": PackageSize.width,
-            "shipment_Height": PackageSize.height,
-            "volumetric_Weight": 0,
-            "pick_Address_ID": warehouse_id,
-            "return_Address_ID": warehouse_id,
-            "products": Product,
-            "courierId": price.data,
-            ...extraFields
-        };
+        let data: any = await redisClient.get(`priceData:${orderId}`);
+        data=JSON.parse(data)
+       
+        let result: any;
+        if (data) {
+            for (let i = 0; i < data.length; i++) {
+                const body = {
+                    "customer_Name": shippingAddress.contact_person_name,
+                    "customer_Mobile": shippingAddress.phone.replace("+91", ""),
+                    "customer_Emailid": shippingAddress.email || "lol@gmail.com",
+                    "customer_Address": shippingAddress.address,
+                    "customer_Address_Type": shippingAddress.address_type,
+                    "customer_PinCode": shippingAddress.zip,
+                    "customer_City": shippingAddress.city,
+                    "orderId": orderId,
+                    "payment_Mode": row[0].payment_method == "cash_on_delivery" ? 1 : 2,
+                    "express_Type": row[0].delivery_type ?? "surface",
+                    "is_Ndd": 0,
+                    "order_Amount": netAmount,
+                    "tax_Amount": taxModel == "include" ? Tax : totalTaxAmount,
+                    "extra_Charges": shippingCost,
+                    "total_Amount": orderAmount,
+                    "shipment_Weight": PackageSize.weight,
+                    "shipment_Length": PackageSize.length,
+                    "shipment_Width": PackageSize.width,
+                    "shipment_Height": PackageSize.height,
+                    "volumetric_Weight": 0,
+                    "pick_Address_ID": warehouse_id,
+                    "return_Address_ID": warehouse_id,
+                    "products": Product,
+                    "courierId": data[i],
+                    ...extraFields
+                };
+                result = await fshipService.createOrder(body);
+                if (result.error || !result.status) {
+                    continue;
+                } else {
+                    data = []
+                }
+            }
+        }
+        console.log("datapfPriceId", data)
 
-        const result = await fshipService.createOrder(body);
-        if (result.error || !result.status) {
-            await logFailedOrder(orderId,warehouseId);
+        if (data.length > 0) {
+            await logFailedOrder(orderId, warehouseId);
             return ApiResponseHandler(result, "API Order creation failed")
         }
 
-        // let pickup = null;
-        // if (result.apiData?.waybill) {
-        //     const data = await fshipService.registerPickup({
-        //         waybills: [String(result.apiData.waybill)]
-        //     });
-        //     if (data.error || !data.status) {
-        //         await logFailedOrder(orderId,warehouseId);
-        //         return ApiResponseHandler(data, "Pickup registration failed")
-        //     }
-        //     pickup = data.apiData;
-        // }
-        await updateOrderStatus(orderId,"1");
 
-        return { status: true, error: false, message: "Order created successfully", data: {order:result.apiData} };
+
+        if (result.apiData?.waybill) {
+            await processPickupCreation(result.apiData.waybill, false, orderId);
+        }
+        await updateOrderStatus(orderId, "1", result.apiData.waybill,result.apiData.labelurl);
+
+        return { status: true, error: false, message: "Order created successfully", data: { order: result.apiData } };
 
     } catch (error: any) {
         console.error("Error While processing order creation", error?.response?.data?.errors || error);
-        await logFailedOrder(orderId,warehouseId);
+        await logFailedOrder(orderId, warehouseId);
         return { status: false, error: true, message: error?.response?.data?.errors || error.message };
     }
 };

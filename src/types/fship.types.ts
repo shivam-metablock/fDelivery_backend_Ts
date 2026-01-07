@@ -34,6 +34,7 @@ export interface TrackingRequest {
 
 export interface CancelOrderRequest {
     waybill: string;
+    reason: string;
 }
 
 export interface AddWarehouseRequest {
@@ -90,6 +91,6 @@ export interface CreateExchangeOrderRequest {
 }
 
 export interface RegisterPickupRequest {
-    waybills: string[];
+    waybills: String[];
 }
 

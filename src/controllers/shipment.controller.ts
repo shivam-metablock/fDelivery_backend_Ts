@@ -53,7 +53,7 @@ export const createOrder = async (req: Request, res: Response) => {
 
 export const registerPickup = async (req: Request, res: Response) => {
     try {
-        const result = await processPickupCreation(req.body.waybill);
+        const result = await processPickupCreation(req.body.waybill,true);
         res.json(result);
     } catch (error: any) {
 

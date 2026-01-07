@@ -1,0 +1,287 @@
+  shipment_rates: [
+    {
+      courier_name: 'Amazon',
+      shipping_charge: 1603.62,
+      cod_charge: 2619.6,
+      rto_charge: 1320.42,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 33,
+      expectedDeliveryDate: '2026-01-07T11:18:09'
+    },
+    {
+      courier_name: 'Blue dart',
+      shipping_charge: 565.22,
+      cod_charge: 218.3,
+      rto_charge: 282.02,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 1,
+      expectedDeliveryDate: '2026-01-07T11:18:09'
+    },
+    {
+      courier_name: 'Blue Dart - Express',
+      shipping_charge: 1131.62,
+      cod_charge: 1528.1,
+      rto_charge: 848.42,
+      service_mode: 'air',
+      zone_name: 'Regional',
+      courier_id: 14,
+      expectedDeliveryDate: '2026-01-07T11:18:09'
+    },
+    {
+      courier_name: 'Delhivery',
+      shipping_charge: 1037.22,
+      cod_charge: 1309.8,
+      rto_charge: 754.02,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 13,
+      expectedDeliveryDate: '2026-01-07T11:18:09'
+    },
+    {
+      courier_name: 'DTDC Air',
+      shipping_charge: 1320.42,
+      cod_charge: 1964.7,
+      rto_charge: 1037.22,
+      service_mode: 'air',
+      zone_name: 'Regional',
+      courier_id: 16,
+      expectedDeliveryDate: '2026-01-07T11:18:09'
+    },
+    {
+      courier_name: 'DTDC Surface',
+      shipping_charge: 1414.82,
+      cod_charge: 2183,
+      rto_charge: 1131.62,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 17,
+      expectedDeliveryDate: '2026-01-07T11:18:09'
+    },
+    {
+      courier_name: 'Ecom Express',
+      shipping_charge: 942.82,
+      cod_charge: 1091.5,
+      rto_charge: 659.62,
+      service_mode: 'air',
+      zone_name: 'Regional',
+      courier_id: 12,
+      expectedDeliveryDate: '2026-01-07T11:18:09'
+    },
+    {
+      courier_name: 'Ekart',
+      shipping_charge: 848.42,
+      cod_charge: 873.2,
+      rto_charge: 565.22,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 9,
+      expectedDeliveryDate: '2026-01-07T11:18:09'
+    },
+    {
+      courier_name: 'Ekart NDD',
+      shipping_charge: 2075.62,
+      cod_charge: 3711.1,
+      rto_charge: 1792.42,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 10051,
+      expectedDeliveryDate: '2026-01-05T11:18:09'
+    },
+    {
+      courier_name: 'IndiaPost',
+      shipping_charge: 1792.42,
+      cod_charge: 3056.2,
+      rto_charge: 1509.22,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 10045,
+      expectedDeliveryDate: '2026-01-07T11:18:09'
+    },
+    {
+      courier_name: 'Velocity Express NDD',
+      shipping_charge: 1981.22,
+      cod_charge: 3492.8,
+      rto_charge: 1698.02,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 10050,
+      expectedDeliveryDate: '2026-01-05T11:18:09'
+    },
+    {
+      courier_name: 'Xpressbees NDD',
+      shipping_charge: 2170.02,
+      cod_charge: 3929.4,
+      rto_charge: 1886.82,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 10052,
+      expectedDeliveryDate: '2026-01-05T11:18:09'
+    },
+    {
+      courier_name: 'Xpressbees Surface 500 gm',
+      shipping_charge: 659.62,
+      cod_charge: 436.6,
+      rto_charge: 376.42,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 2,
+      expectedDeliveryDate: '2026-01-07T11:18:09'
+    },
+    {
+      courier_name: 'Zippyy Express',
+      shipping_charge: 2170.02,
+      cod_charge: 3929.4,
+      rto_charge: 1886.82,
+      service_mode: 'air',
+      zone_name: 'Regional',
+      courier_id: 10049,
+      expectedDeliveryDate: '2026-01-07T11:18:09'
+    }
+  ],
+
+
+   shipment_rates: [
+    {
+      courier_name: 'Amazon',
+      shipping_charge: 1603.62,
+      cod_charge: 2619.6,
+      rto_charge: 1320.42,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 33,
+      expectedDeliveryDate: '2026-01-07T11:20:30'
+    },
+    {
+      courier_name: 'Blue dart',
+      shipping_charge: 565.22,
+      cod_charge: 218.3,
+      rto_charge: 282.02,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 1,
+      expectedDeliveryDate: '2026-01-07T11:20:29'
+    },
+    {
+      courier_name: 'Blue Dart - Express',
+      shipping_charge: 1131.62,
+      cod_charge: 1528.1,
+      rto_charge: 848.42,
+      service_mode: 'air',
+      zone_name: 'Regional',
+      courier_id: 14,
+      expectedDeliveryDate: '2026-01-07T11:20:30'
+    },
+    {
+      courier_name: 'Delhivery',
+      shipping_charge: 1037.22,
+      cod_charge: 1309.8,
+      rto_charge: 754.02,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 13,
+      expectedDeliveryDate: '2026-01-07T11:20:30'
+    },
+    {
+      courier_name: 'DTDC Air',
+      shipping_charge: 1320.42,
+      cod_charge: 1964.7,
+      rto_charge: 1037.22,
+      service_mode: 'air',
+      zone_name: 'Regional',
+      courier_id: 16,
+      expectedDeliveryDate: '2026-01-07T11:20:30'
+    },
+    {
+      courier_name: 'DTDC Surface',
+      shipping_charge: 1414.82,
+      cod_charge: 2183,
+      rto_charge: 1131.62,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 17,
+      expectedDeliveryDate: '2026-01-07T11:20:30'
+    },
+    {
+      courier_name: 'Ecom Express',
+      shipping_charge: 942.82,
+      cod_charge: 1091.5,
+      rto_charge: 659.62,
+      service_mode: 'air',
+      zone_name: 'Regional',
+      courier_id: 12,
+      expectedDeliveryDate: '2026-01-07T11:20:30'
+    },
+    {
+      courier_name: 'Ekart',
+      shipping_charge: 848.42,
+      cod_charge: 873.2,
+      rto_charge: 565.22,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 9,
+      expectedDeliveryDate: '2026-01-07T11:20:29'
+    },
+    {
+      courier_name: 'Ekart NDD',
+      shipping_charge: 2075.62,
+      cod_charge: 3711.1,
+      rto_charge: 1792.42,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 10051,
+      expectedDeliveryDate: '2026-01-05T11:20:30'
+    },
+    {
+      courier_name: 'IndiaPost',
+      shipping_charge: 1792.42,
+      cod_charge: 3056.2,
+      rto_charge: 1509.22,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 10045,
+      expectedDeliveryDate: '2026-01-07T11:20:30'
+    },
+    {
+      courier_name: 'Velocity Express NDD',
+      shipping_charge: 1981.22,
+      cod_charge: 3492.8,
+      rto_charge: 1698.02,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 10050,
+      expectedDeliveryDate: '2026-01-05T11:20:30'
+    },
+    {
+      courier_name: 'Xpressbees NDD',
+      shipping_charge: 2170.02,
+      cod_charge: 3929.4,
+      rto_charge: 1886.82,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 10052,
+      expectedDeliveryDate: '2026-01-05T11:20:30'
+    },
+    {
+      courier_name: 'Xpressbees Surface 500 gm',
+      shipping_charge: 659.62,
+      cod_charge: 436.6,
+      rto_charge: 376.42,
+      service_mode: 'surface',
+      zone_name: 'Regional',
+      courier_id: 2,
+      expectedDeliveryDate: '2026-01-07T11:20:29'
+    },
+    {
+      courier_name: 'Zippyy Express',
+      shipping_charge: 2170.02,
+      cod_charge: 3929.4,
+      rto_charge: 1886.82,
+      service_mode: 'air',
+      zone_name: 'Regional',
+      courier_id: 10049,
+      expectedDeliveryDate: '2026-01-07T11:20:30'
+    }
+  ],
+ 

@@ -3,9 +3,9 @@ import pool from '../config/db.config.js';
 import { RowDataPacket } from 'mysql2';
 
 export const getOrder = async (orderId: string, warehouseId: string) => {
-    console.log("warehouseId",warehouseId);
-    
-    const [row] = await pool.query<RowDataPacket[]>(`
+  console.log("warehouseId", warehouseId);
+
+  const [row] = await pool.query<RowDataPacket[]>(`
     SELECT
     o.shipping_address_data,
     o.seller_id,
@@ -16,71 +16,129 @@ export const getOrder = async (orderId: string, warehouseId: string) => {
     o.payment_method,
     o.delivery_type,
     o.shipping_cost,
-
-    ANY_VALUE(w.name)        AS warehouse_name,
-    ANY_VALUE(w.pincode)     AS pincode,
-    ANY_VALUE(w.city)        AS city,
-    ANY_VALUE(w.address_1)   AS address_1,
+    ANY_VALUE(w.name) AS warehouse_name,
+    ANY_VALUE(w.pincode) AS pincode,
+    ANY_VALUE(w.city) AS city,
+    ANY_VALUE(w.address_1) AS address_1,
     ANY_VALUE(w.warehouse_id) AS warehouse_id,
     ANY_VALUE(w.id) AS warehouseTable_id,
-
     JSON_ARRAYAGG(
-        JSON_OBJECT(
-            'product_id', JSON_UNQUOTE(JSON_EXTRACT(od.product_details, '$.id')),
-            'name', JSON_UNQUOTE(JSON_EXTRACT(od.product_details, '$.name')),
-            'unit_price', JSON_EXTRACT(od.product_details, '$.unit_price'),
-            'discount', JSON_EXTRACT(od.product_details, '$.discount'),
-            'categories',
-                IFNULL(
-                    (
-                        SELECT JSON_ARRAYAGG(c.name)
-                        FROM JSON_TABLE(
-                            JSON_EXTRACT(od.product_details, '$.category_ids'),
-                            '$[*]' COLUMNS (category_id INT PATH '$')
-                        ) jt
-                        JOIN categories c ON c.id = jt.category_id
-                    ),
-                    JSON_ARRAY()
-                ),
-            'qty', od.qty
+     JSON_OBJECT(
+      'product_id', JSON_UNQUOTE(JSON_EXTRACT(od.product_details, '$.id')),
+      'name', JSON_UNQUOTE(JSON_EXTRACT(od.product_details, '$.name')),
+      'unit_price', JSON_EXTRACT(od.product_details, '$.unit_price'),
+      'discount', JSON_EXTRACT(od.product_details, '$.discount'),
+      'categories',
+        IFNULL(
+          (
+            SELECT JSON_ARRAYAGG(c.name)
+              FROM JSON_TABLE(
+                JSON_EXTRACT(od.product_details, '$.category_ids'),
+                '$[*]' COLUMNS (category_id INT PATH '$')
+              ) jt
+                JOIN categories c ON c.id = jt.category_id
+             ),
+              JSON_ARRAY()
+            ),
+            'qty', 
+            od.qty
         )
     ) AS products
-
     FROM orders o
-         JOIN order_details od 
-              ON o.id = od.order_id
-              LEFT JOIN warehouses w  
-              ON w.id = ?
-
+      JOIN order_details od 
+      ON o.id = od.order_id
+      LEFT JOIN warehouses w  
+      ON w.id = ?
     WHERE o.id = ?
     GROUP BY o.id;
  `, [warehouseId, orderId]);
 
-    return row
+  return row
 }
 
-export const getOrderStatus=async()=>{
-    const row=await pool.query<RowDataPacket[]>(`
-        Select waybill
-        FROM orders
-        WHERE is_order_shipped = 1;
-        `)
-    return row
+export const getOrderStatus = async () => {
+  const row = await pool.query<RowDataPacket[]>(`
+    SELECT fship_waybill AS waybill
+    FROM orders
+    WHERE is_order_shipped = 1
+    AND order_status <> 'Delivered'
+    AND fship_waybill IS NOT NULL
+    AND is_pickuped = 1;`)
+  return row
 }
-export const updateOrderStatus=async(orderId:string,status:string)=>{
-    const row=await pool.query<RowDataPacket[]>(`
+export const updateOrderStatus = async (orderId: string, status: string, waybill: string, label: string) => {
+  const row = await pool.query<RowDataPacket[]>(`
         Update orders
         SET is_order_shipped  = ?,
- WHERE id = ?;
-        `,[status,orderId])
-    return row
+        fship_waybill = ?,
+        Label_url = ?
+        WHERE id = ?;
+        `, [status, waybill, label, orderId])
+
+  return row
 }
 
-export const updatePickupStatus=async(waybill:string,status:string)=>{
-    const row=await pool.query<RowDataPacket[]>(`
-        Update orders
-        SET is_pickuped  = ?,
-        WHERE waybill = ?;  
-        `,[status,waybill])
-    return row
+export const updatePickupStatus = async (
+  waybill: string | string[],
+  status: string,
+  isPickuped: boolean
+) => {
+
+  if (isPickuped) {
+    const waybills = Array.isArray(waybill) ? waybill : [waybill];
+
+    const [result] = await pool.query(
+      `
+  UPDATE orders
+  SET is_pickuped = ?
+  WHERE fship_waybill IN (?);
+  `,
+      [status, waybills]
+    );
+    return result
+
+  } else {
+    const [result] = await pool.query(
+      `
+      UPDATE orders
+      SET is_pickuped = ?
+      WHERE id = ?;
+      `,
+      [status, waybill]
+    );
+    console.log("result update with orderid");
+
+    return result;
+  }
+};
+
+export const AddDataINorder = async (trackingData: any, waybill: string, expectedDeliveryDate: string) => {
+  const [result] = await pool.query(
+    `
+        UPDATE orders
+        SET fship_tracking_data = ?,
+        expected_delivery_date = ?
+        WHERE fship_waybill = ?;
+        `,
+    [JSON.stringify(trackingData), expectedDeliveryDate, waybill]
+  );
+
+  return result;
 }
+
+
+export const BulkInsertDataInorderTable = async (fulfilledData: any) => {
+  const waybills = fulfilledData.map((d: any) => `'${d[0]}'`).join(",");
+  const trackingDataCases = fulfilledData.map((d: any) => `WHEN fship_waybill = '${d[0]}' THEN '${d[1]}'`).join(" ");
+  const deliveryDateCases = fulfilledData.map((d: any) => `WHEN fship_waybill = '${d[0]}' THEN '${d[2]}'`).join(" ");
+
+  const sql = `
+    UPDATE orders 
+    SET 
+        fship_tracking_data = CASE ${trackingDataCases} END,
+        expected_delivery_date = CASE ${deliveryDateCases} END
+    WHERE fship_waybill IN (${waybills});
+`;
+
+  await pool.query(sql);
+};

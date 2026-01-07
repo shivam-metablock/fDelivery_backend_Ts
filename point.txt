@@ -1,3 +1,4 @@
-vender shiping cost 
-webhook status of shiping 
+vender shiping cost (like when vendor  product wieght   during the pickup less and more how can know about this )
+webhook status of shiping
 api/ShipmentSummary got 404
+check in pincode aviable  but the select lowest price on shipping  after in api get the essue like this is provide the product in same resgine

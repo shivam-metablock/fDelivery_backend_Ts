@@ -1,7 +1,6 @@
 export const ResponseHandler = (response: any) => {
 
-
-    return {
+ return {
         ...response.data,
         apiData: response.data,
         status: response.status === 200 && response.data.status,
