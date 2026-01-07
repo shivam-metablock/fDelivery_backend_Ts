@@ -97,12 +97,16 @@ export const initCronJobs = () => {
 
                 const waybill = await Promise.allSettled(row[0].map(async (item: any) => fshipService.getPickupDetails({ waybill: item.waybill })))
 
+
                 const fulfilledData = waybill
                     .filter(item => item.status === 'fulfilled')
                     .map((item: any) => [
                         item.value?.summary?.waybill,
                         JSON.stringify(item.value?.trackingdata),
-                        item.value?.summary?.expectedDeliveryDate
+                        item.value?.summary?.expectedDeliveryDate,
+                        item.value?.summary?.fulfilledby,
+                        item.value?.summary?.status,
+                        item.value?.summary?.orderid
                     ]);
 
 
@@ -118,7 +122,7 @@ export const initCronJobs = () => {
             console.error('Error in cron job lock/system:', error);
         }
     });
-    cron.schedule('0 0/1 * * *', async () => {
+    cron.schedule('0 0/3 * * *', async () => {
         try {
             await connectRedis();
 
@@ -127,7 +131,7 @@ export const initCronJobs = () => {
             const lockKey = 'cron_pickup_lock';
             const acquired = await redisClient.set(lockKey, 'locked', {
                 NX: true,
-                EX: 10800/3
+                EX: 10800
             });
 
             if (!acquired) {

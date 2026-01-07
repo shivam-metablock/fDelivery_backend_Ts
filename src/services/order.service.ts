@@ -18,10 +18,10 @@ export const processOrderCreation = async (orderId: string, warehouseId: string)
         const shippingAddress = JSON.parse(row[0].shipping_address_data);
         const billingAddress = JSON.parse(row[0].billing_address_data);
         const PackageSize = {
-            height: 20,
-            width: 20,
-            length: 20,
-            weight: 20
+            height: Number(row[0].height),
+            width: Number(row[0].width),
+            length: Number(row[0].length),
+            weight: Number(row[0].weight)
         };
 
         const orderAmount = row[0].order_amount;

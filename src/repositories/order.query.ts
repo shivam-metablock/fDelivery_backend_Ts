@@ -11,6 +11,10 @@ export const getOrder = async (orderId: string, warehouseId: string) => {
     o.seller_id,
     o.billing_address_data,
     o.order_amount,
+    o.height,
+    o.width,
+    o.length,
+    o.weight,
     o.total_tax_amount,
     o.tax_model,
     o.payment_method,
@@ -125,20 +129,34 @@ export const AddDataINorder = async (trackingData: any, waybill: string, expecte
 
   return result;
 }
-
+const escapeQuotes = (str: string) => str.replace(/'/g, "''");
 
 export const BulkInsertDataInorderTable = async (fulfilledData: any) => {
   const waybills = fulfilledData.map((d: any) => `'${d[0]}'`).join(",");
+  const orderIds = fulfilledData.map((d: any) => `'${d[5]}'`).join(",");
   const trackingDataCases = fulfilledData.map((d: any) => `WHEN fship_waybill = '${d[0]}' THEN '${d[1]}'`).join(" ");
   const deliveryDateCases = fulfilledData.map((d: any) => `WHEN fship_waybill = '${d[0]}' THEN '${d[2]}'`).join(" ");
-
+  const deliveryServiceNameCases = fulfilledData.map((d: any) => `WHEN fship_waybill = '${d[0]}' THEN '${d[3]}'`).join(" ");
+  const deliveryStatusCases = fulfilledData.map((d: any) => `WHEN fship_waybill = '${d[0]}' THEN '${escapeQuotes(d[4])}'`).join(" ");
+  const orderStatusCases = fulfilledData.map((d: any) => `WHEN order_id = '${d[5]}' THEN '${escapeQuotes(d[4])}'`).join(" ");
+ 
   const sql = `
     UPDATE orders 
     SET 
         fship_tracking_data = CASE ${trackingDataCases} END,
-        expected_delivery_date = CASE ${deliveryDateCases} END
+        expected_delivery_date = CASE ${deliveryDateCases} END,
+        delivery_service_name = CASE ${deliveryServiceNameCases} END,
+        order_status = CASE ${deliveryStatusCases} END
     WHERE fship_waybill IN (${waybills});
 `;
+  const sql2 = `
+UPDATE order_status_histories
+SET status = CASE ${orderStatusCases} END
+WHERE order_id IN (${orderIds});
+`
 
-  await pool.query(sql);
+  Promise.allSettled([
+    pool.query(sql),
+    pool.query(sql2)
+  ])
 };
