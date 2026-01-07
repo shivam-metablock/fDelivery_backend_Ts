@@ -90,7 +90,7 @@ export const getShippingLabel = async (req: Request, res: Response) => {
 export const getPickupDetails = async (req: Request, res: Response) => {
     try {
         const result = await fshipService.getPickupDetails(req.body);
-        res.json(result);
+        res.json(result.apiData);
     } catch (error: any) {
         res.status(500).json({ status: false, error: true, message: error.message });
     }
