@@ -7,7 +7,7 @@ import { processPickupCreation } from '../services/PickUp.service.js';
 export const checkPincode = async (req: Request, res: Response) => {
     try {
         const result = await fshipService.checkPincode(req.body);
-        res.json(result);
+        res.json(result.apiData);
     } catch (error: any) {
         res.status(500).json({ status: false, error: true, message: error.message });
     }
