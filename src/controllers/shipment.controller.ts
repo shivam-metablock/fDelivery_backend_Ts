@@ -16,7 +16,7 @@ export const checkPincode = async (req: Request, res: Response) => {
 export const getPrice = async (req: Request, res: Response) => {
     try {
         const result = await fshipService.getPrice(req.body);
-        res.json(result);
+        res.json(result.apiData);
     } catch (error: any) {
         res.status(500).json({ status: false, error: true, message: error.message });
     }
@@ -24,7 +24,7 @@ export const getPrice = async (req: Request, res: Response) => {
 export const addWareHouse = async (req: Request, res: Response) => {
     try {
         const result = await fshipService.addWarehouse(req.body);
-        res.json(result);
+        res.json(result.apiData);
     } catch (error: any) {
         res.status(500).json({ status: false, error: true, message: error.message });
     }
@@ -72,7 +72,7 @@ export const cancelShipment = async (req: Request, res: Response) => {
 export const getCouriers = async (req: Request, res: Response) => {
     try {
         const result = await fshipService.getCouriers();
-        res.json(result);
+        res.json(result.apiData);
     } catch (error: any) {
         res.status(500).json({ status: false, error: true, message: error.message });
     }
@@ -81,7 +81,7 @@ export const getCouriers = async (req: Request, res: Response) => {
 export const getShippingLabel = async (req: Request, res: Response) => {
     try {
         const result = await fshipService.getShippingLabel(req.body);
-        res.json(result);
+        res.json(result.apiData);
     } catch (error: any) {
         res.status(500).json({ status: false, error: true, message: error.message });
     }
