@@ -3,7 +3,7 @@ import { redisClient } from './redis.service.js';
 import { processOrderCreation } from './order.service.js';
 import { fshipService } from './fship.service.js';
 import { processPickupCreation } from './PickUp.service.js';
-import { AddDataINorder, BulkInsertDataInorderTable, getOrderStatus } from '../repositories/order.query.js';
+import { BulkInsertDataInorderTable, getOrderStatus } from '../repositories/order.query.js';
 
 async function connectRedis() {
     if (!redisClient.isOpen) {
