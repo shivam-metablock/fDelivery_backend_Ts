@@ -60,18 +60,18 @@ export const getOrderStatus = async () => {
   const row = await pool.query<RowDataPacket[]>(`
     SELECT fship_waybill AS waybill
     FROM orders
-    WHERE is_order_shipped = 1
+    WHERE is_fship_order_ready_pickup = 1
     AND order_status <> 'Delivered'
     AND fship_waybill IS NOT NULL
-    AND is_pickuped = 1;`)
+    AND is_fship_order_placed = 1;`)
   return row
 }
 export const updateOrderStatus = async (orderId: string, status: string, waybill: string, label: string) => {
   const row = await pool.query<RowDataPacket[]>(`
         Update orders
-        SET is_order_shipped  = ?,
+        SET is_fship_order_ready_pickup= ?,
         fship_waybill = ?,
-        Label_url = ?
+        fship_label_url = ?
         WHERE id = ?;
         `, [status, waybill, label, orderId])
 
@@ -90,7 +90,7 @@ export const updatePickupStatus = async (
     const [result] = await pool.query(
       `
   UPDATE orders
-  SET is_pickuped = ?
+  SET is_fship_order_placed = ?
   WHERE fship_waybill IN (?);
   `,
       [status, waybills]
@@ -101,7 +101,7 @@ export const updatePickupStatus = async (
     const [result] = await pool.query(
       `
       UPDATE orders
-      SET is_pickuped = ?
+      SET is_fship_order_placed = ?
       WHERE id = ?;
       `,
       [status, waybill]
