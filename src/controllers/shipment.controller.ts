@@ -7,11 +7,13 @@ import { processPickupCreation } from '../services/PickUp.service.js';
 export const checkPincode = async (req: Request, res: Response) => {
     try {
         const result = await fshipService.checkPincode(req.body);
-        res.json(result.apiData);
+         res.json(result.apiData);
     } catch (error: any) {
         res.status(500).json({ status: false, error: true, message: error.message });
     }
 };
+
+
 
 export const getPrice = async (req: Request, res: Response) => {
     try {
@@ -19,7 +21,7 @@ export const getPrice = async (req: Request, res: Response) => {
         res.json(result.apiData);
     } catch (error: any) {
         res.status(500).json({ status: false, error: true, message: error.message });
-    }
+    } 
 }
 export const addWareHouse = async (req: Request, res: Response) => {
     try {

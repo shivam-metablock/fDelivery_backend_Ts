@@ -129,34 +129,114 @@ export const AddDataINorder = async (trackingData: any, waybill: string, expecte
 
   return result;
 }
-const escapeQuotes = (str: string) => str.replace(/'/g, "''");
 
-export const BulkInsertDataInorderTable = async (fulfilledData: any) => {
-  const waybills = fulfilledData.map((d: any) => `'${d[0]}'`).join(",");
-  const orderIds = fulfilledData.map((d: any) => `'${d[5]}'`).join(",");
-  const trackingDataCases = fulfilledData.map((d: any) => `WHEN fship_waybill = '${d[0]}' THEN '${d[1]}'`).join(" ");
-  const deliveryDateCases = fulfilledData.map((d: any) => `WHEN fship_waybill = '${d[0]}' THEN '${d[2]}'`).join(" ");
-  const deliveryServiceNameCases = fulfilledData.map((d: any) => `WHEN fship_waybill = '${d[0]}' THEN '${d[3]}'`).join(" ");
-  const deliveryStatusCases = fulfilledData.map((d: any) => `WHEN fship_waybill = '${d[0]}' THEN '${escapeQuotes(d[4])}'`).join(" ");
-  const orderStatusCases = fulfilledData.map((d: any) => `WHEN order_id = '${d[5]}' THEN '${escapeQuotes(d[4])}'`).join(" ");
- 
-  const sql = `
-    UPDATE orders 
-    SET 
-        fship_tracking_data = CASE ${trackingDataCases} END,
-        expected_delivery_date = CASE ${deliveryDateCases} END,
-        delivery_service_name = CASE ${deliveryServiceNameCases} END,
-        order_status = CASE ${deliveryStatusCases} END
-    WHERE fship_waybill IN (${waybills});
-`;
-  const sql2 = `
-UPDATE order_status_histories
-SET status = CASE ${orderStatusCases} END
-WHERE order_id IN (${orderIds});
-`
+export const BulkInsertDataInorderTable = async (fulfilledData: any[]) => {
+  if (!fulfilledData.length) return;
 
-  Promise.allSettled([
-    pool.query(sql),
-    pool.query(sql2)
-  ])
+  const conn = await pool.getConnection();
+
+  try {
+    await conn.beginTransaction();
+
+    // 1️⃣ Create TEMP table (session-only)
+  await conn.query(`
+  CREATE TEMPORARY TABLE IF NOT EXISTS tmp_order_tracking (
+    fship_waybill VARCHAR(50)
+      CHARACTER SET utf8mb4
+      COLLATE utf8mb4_unicode_ci
+      PRIMARY KEY,
+
+    order_id VARCHAR(50)
+      CHARACTER SET utf8mb4
+      COLLATE utf8mb4_unicode_ci,
+
+    fship_tracking_data JSON,
+    expected_delivery_date DATETIME,
+
+    delivery_service_name VARCHAR(50)
+      CHARACTER SET utf8mb4
+      COLLATE utf8mb4_unicode_ci,
+
+    order_status VARCHAR(50)
+      CHARACTER SET utf8mb4
+      COLLATE utf8mb4_unicode_ci
+  )
+`);
+
+    // 2️⃣ Clean previous temp data (safe)
+    await conn.query(`TRUNCATE TABLE tmp_order_tracking`);
+
+    const normalizeStatus = (status: string | null): string | null => {
+  if (!status) return null;
+
+  const s = status.toLowerCase();
+
+  if (/cancel/i.test(s)) return 'cancelled';       
+  if (/deliver/i.test(s)) return 'delivered';      
+  if (/reject/i.test(s)) return 'rejected';      
+
+  return status;                                   
+};
+  const rows = fulfilledData
+  .filter(d => d && d[0]) 
+  .map(d => [
+    d[0],                          
+    d[5],                          
+    d[1] ?? null,                  
+    d[2]
+      ? new Date(d[2]).toISOString().slice(0, 19).replace('T', ' ')
+      : null,                      
+    d[3] ?? null,                  
+    normalizeStatus(d[4]) ?? null                   
+  ]);
+
+    await conn.query(
+      `
+      INSERT INTO tmp_order_tracking
+      (fship_waybill, order_id, fship_tracking_data, expected_delivery_date, delivery_service_name, order_status)
+      VALUES ?
+      `,
+      [rows]
+    );
+
+    await conn.query(`
+  UPDATE orders o
+  JOIN tmp_order_tracking t
+    ON o.fship_waybill = t.fship_waybill
+  SET
+    o.fship_tracking_data = t.fship_tracking_data,
+    o.expected_delivery_date = t.expected_delivery_date,
+    o.delivery_service_name = t.delivery_service_name,
+    o.order_status = CASE
+      WHEN LOWER(t.order_status) IN ('cancelled', 'delivered')
+        THEN t.order_status
+      ELSE o.order_status
+    END
+`);
+
+    // await conn.query(`
+    //   UPDATE orders o
+    //   JOIN tmp_order_tracking t
+    //     ON o.fship_waybill = t.fship_waybill
+    //   SET
+    //     o.fship_tracking_data = t.fship_tracking_data,
+    //     o.expected_delivery_date = t.expected_delivery_date,
+    //     o.delivery_service_name = t.delivery_service_name
+    //     ${['cancelled', 'delivered'].includes(t.order_status) &&', o.order_status = t.order_status'}
+    // `);
+
+    // await conn.query(`
+    //   UPDATE order_status_histories h
+    //   JOIN tmp_order_tracking t
+    //     ON h.order_id = t.order_id
+    //   SET h.status = t.order_status
+    // `);
+
+    await conn.commit();
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release(); 
+  }
 };

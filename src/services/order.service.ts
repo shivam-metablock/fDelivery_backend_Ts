@@ -27,7 +27,6 @@ export const processOrderCreation = async (orderId: string, warehouseId: string)
         const orderAmount = row[0].order_amount;
         let warehouse_id = row[0].warehouse_id;
         warehouseId = row[0].warehouseTable_id;
-        // console.log("rowdata",row[0]);
         if (!warehouseId) {
             return ApiResponseHandler({ message: "Warehouse not found" })
         }
@@ -40,7 +39,6 @@ export const processOrderCreation = async (orderId: string, warehouseId: string)
                 return ApiResponseHandler(WareHouse, "Warehouse not found")
             }
 
-            console.log("WareHouse", WareHouse.apiData);
 
             warehouse_id = WareHouse.apiData?.warehouseId;
             await AddInDBWarehouse(Number(warehouseId), Number(warehouse_id));

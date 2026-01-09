@@ -30,7 +30,6 @@ export const logFailedOrder = async (orderData: any, warehouseId: string) => {
 export const logFailedPickup = async (waybill: string|string[]) => {
     try {
         console.log("waybillIN REDIS", JSON.stringify(waybill));
-
         await connectRedis();
         if(Array.isArray(waybill)){
             await redisClient.lPush('failed_pickup', waybill.map(wb => JSON.stringify(wb)));

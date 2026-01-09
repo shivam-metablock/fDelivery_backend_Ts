@@ -8,25 +8,26 @@ import http from "http";
 import os from "os";
 import cors from 'cors';
 import cluster from 'cluster';
+import { AddWarehouseConsumer } from './Queue/Consumer.js';
 
 dotenv.config();
 const cpuUsage = os.cpus().length;
 
 if (cluster.isPrimary && false) {
     console.log(`Master ${process.pid} is running`);
-
+    
     // Fork workers.
     for (let i = 0; i < cpuUsage; i++) {
         cluster.fork();
     }
-
+    
     cluster.on('exit', (worker, code, signal) => {
         console.log(`worker ${worker.process.pid} died`);
     });
 } else {
-
     const app = express();
     const server = http.createServer(app);
+    AddWarehouseConsumer()
     const PORT = process.env.PORT || 3000;
 
     app.use(cors({ origin: "*" }));

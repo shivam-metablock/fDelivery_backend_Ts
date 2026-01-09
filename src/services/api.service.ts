@@ -1,4 +1,5 @@
 import pool from "../config/db.config.js";
+import { WAREHOUSE_QUEUE,createChannel } from "../Queue/rabbitmq.js";
 import { fshipService } from "./fship.service.js";
 import { redisClient } from "./redis.service.js";
 
@@ -42,8 +43,6 @@ export const PriceApiUse = async (PackageSize: {
     } else {
         return { status: false, error: true, message: price.message };
     }
-
-
 }
 
 const CalculatePrice = (Price: any) => {
@@ -60,7 +59,7 @@ const CalculatePrice = (Price: any) => {
 
 export const WareHouseApiUse = async (data: any, row: any) => {
 
-    console.log("wareHouseApiUse", row.warehouse_name, row.address_1, row.pincode, row.city, data.contact_person_name, data.phone);
+    // console.log("wareHouseApiUse", row.warehouse_name, row.address_1, row.pincode, row.city, data.contact_person_name, data.phone);
 
     const warehouse = await fshipService.addWarehouse({
         warehouseId: 0,
@@ -76,16 +75,18 @@ export const WareHouseApiUse = async (data: any, row: any) => {
 }
 
 export const AddInDBWarehouse = async (warehouseTable_id: number, warehouseId: number) => {
-    console.log("warehouseTable_id", warehouseTable_id);
-    console.log("warehouseId", warehouseId);
+    // console.log("warehouseTable_id", warehouseTable_id);
+    // console.log("warehouseId", warehouseId);
 
-    try {
-        const row = await pool.query("UPDATE warehouses SET warehouse_id = ? WHERE id = ?", [warehouseId, warehouseTable_id]);
-        console.log("AddInDBWarehouse", row);
+    const channel = await createChannel();
+   
+   channel.sendToQueue(
+  WAREHOUSE_QUEUE,
+  Buffer.from(JSON.stringify({ warehouseTable_id, warehouseId })),
+  { persistent: true }
 
-    } catch (error) {
-        console.error("error in the AddInDBWarehouse", error);
-
-    }
+  
+);
+await channel.close();
 
 }

@@ -7,14 +7,6 @@ export const processPickupCreation = async (waybill: string[]|string,bool:boolea
         const result = await fshipService.registerPickup({
             waybills:Array.isArray(waybill)?waybill:[waybill]
         });
-        // const result={
-        //     apiData:{
-        //         waybill:waybill,
-        //         labelurl:""
-        //     },
-        //     error:true,
-        //     status:false
-        // }
         if(result.error || !result.status){
             await logFailedPickup(waybill);
             return { status: false, error: true, message: result };

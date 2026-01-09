@@ -79,8 +79,6 @@ router.post('/cancelShipment', shipmentController.cancelShipment);
  */
 router.post('/checkShipment', upload.none(),shipmentController.getPickupDetails);
 
-
-
 router.post('/label', shipmentController.getShippingLabel);
 
 router.get('/couriers', shipmentController.getCouriers);

@@ -61,7 +61,6 @@ class FshipService {
         const response = await this.api.post('/CancelOrder', data);
         return ResponseHandler(response);
     }
-
     async getShippingLabel(data: { waybill: string }): Promise<FshipResponse> {
         const response = await this.api.post('/shippinglabel', data);
         return ResponseHandler(response);
