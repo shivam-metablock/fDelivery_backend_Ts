@@ -14,7 +14,7 @@ import { DqlConsumer } from './Queue/DqlConsumer.js';
 dotenv.config();
 const cpuUsage = os.cpus().length;
 
-if (cluster.isPrimary && false) {
+if (cluster.isPrimary) {
     console.log(`Master ${process.pid} is running`);
     
     // Fork workers.
