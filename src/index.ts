@@ -9,6 +9,7 @@ import os from "os";
 import cors from 'cors';
 import cluster from 'cluster';
 import { AddWarehouseConsumer } from './Queue/Consumer.js';
+import { DqlConsumer } from './Queue/DqlConsumer.js';
 
 dotenv.config();
 const cpuUsage = os.cpus().length;
@@ -28,6 +29,7 @@ if (cluster.isPrimary && false) {
     const app = express();
     const server = http.createServer(app);
     AddWarehouseConsumer()
+    DqlConsumer()
     const PORT = process.env.PORT || 3000;
 
     app.use(cors({ origin: "*" }));

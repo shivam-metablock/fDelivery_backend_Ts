@@ -20,6 +20,8 @@ export const AddWarehouseConsumer = async () => {
         await AddHouseInDB(payload.warehouseTable_id, payload.warehouseId);
         channel.ack(msg);
       } catch (err: any) {
+        console.log("Error",MAX_RETRIES);
+        
         if (retryCount >= MAX_RETRIES) {
           channel.sendToQueue(
             WAREHOUSE_DLQ,

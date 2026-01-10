@@ -1,4 +1,6 @@
 import amqp from "amqplib";
+import dotenv from "dotenv";
+dotenv.config();
 
 let connection: amqp.Connection | null = null;
 
@@ -9,10 +11,11 @@ const WAREHOUSE_EXCHANGE = "add_warehouse_exchange";
 
 export const getConnection = async () => {
   if (!connection) {
+    const connectionUrl=      process.env.RABBITMQ_URL || "amqp://localhost:5672"
+    console.log("Connection URL:", connectionUrl);
+    
       //@ts-ignore
-    connection = await amqp.connect(
-      process.env.RABBITMQ_URL || "amqp://localhost:5672"
-    );
+    connection = await amqp.connect(connectionUrl);
   }
   return connection;
 };

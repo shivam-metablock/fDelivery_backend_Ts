@@ -123,7 +123,6 @@ export const processOrderCreation = async (orderId: string, warehouseId: string)
                 }
             }
         }
-        console.log("datapfPriceId", data)
 
         if (data.length > 0) {
             await logFailedOrder(orderId, warehouseId);
