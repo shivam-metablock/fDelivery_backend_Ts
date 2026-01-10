@@ -12,7 +12,7 @@ const WAREHOUSE_EXCHANGE = "add_warehouse_exchange";
 export const getConnection = async () => {
   if (!connection) {
     const connectionUrl=      process.env.RABBITMQ_URL || "amqp://localhost:5672"
-    console.log("Connection URL:", connectionUrl);
+    
     
       //@ts-ignore
     connection = await amqp.connect(connectionUrl);
