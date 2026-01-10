@@ -13,7 +13,7 @@ async function connectRedis() {
 
 export const initCronJobs = () => {
     // 0 0/3 * * *
-    cron.schedule('0 0/1 * * *', async () => {
+    cron.schedule('* * * * *', async () => {
         try {
             await connectRedis();
 
