@@ -13,14 +13,14 @@ async function connectRedis() {
 
 export const initCronJobs = () => {
     // 0 0/3 * * *
-    cron.schedule('* * * * *', async () => {
+    cron.schedule('0 0/1 * * *', async () => {
         try {
             await connectRedis();
 
             const lockKey = 'cron_retry_failed_orders_lock';
             const acquired = await redisClient.set(lockKey, 'locked', {
                 NX: true,
-                EX: 55
+                EX: 10800/3
             });
 
             if (!acquired) {
